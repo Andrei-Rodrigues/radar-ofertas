@@ -125,12 +125,6 @@ export default function LinkBioPage() {
           </>
         )}
 
-        <div className="text-center">
-          <p className="font-mono text-[10.5px] text-slate-500 leading-relaxed">
-            alguns links acima são links de afiliado — comissão sobre a venda, sem custo extra
-            pra você
-          </p>
-        </div>
       </div>
     </div>
   );

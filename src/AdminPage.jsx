@@ -272,7 +272,7 @@ function AddLinkModal({ onClose, onCreated }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-[14px] border border-emerald-400/40 bg-[#101b2e] p-5 my-auto"
+        className="w-full max-w-lg rounded-[14px] border border-emerald-400/40 bg-[#101b2e] p-6 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
