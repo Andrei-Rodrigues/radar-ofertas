@@ -237,28 +237,30 @@ function LinkForm({ form, setForm }) {
 const MESSAGE_TEMPLATES = [
   {
     label: "🔥 Oferta",
-    build: (link) => {
-      const lines = [`🔥 *${link.title}*`];
+    build: (link, useEmoji) => {
+      const lines = [useEmoji ? `🔥 *${link.title}*` : `OFERTA: *${link.title}*`];
       if (link.sub) lines.push(link.sub);
-      lines.push("", `👉 ${link.href}`);
+      lines.push("", useEmoji ? `👉 ${link.href}` : link.href);
       return lines.join("\n");
     },
   },
   {
     label: "⚡ Achado do dia",
-    build: (link) => {
-      const lines = [`⚡ Achado do dia: *${link.title}*`];
+    build: (link, useEmoji) => {
+      const lines = [
+        useEmoji ? `⚡ Achado do dia: *${link.title}*` : `Achado do dia: *${link.title}*`,
+      ];
       if (link.sub) lines.push(link.sub);
-      lines.push("", `👉 confere: ${link.href}`);
+      lines.push("", useEmoji ? `👉 confere: ${link.href}` : `confere: ${link.href}`);
       return lines.join("\n");
     },
   },
   {
     label: "💰 Preço baixou",
-    build: (link) => {
-      const lines = [`💰 Baixou de preço! *${link.title}*`];
+    build: (link, useEmoji) => {
+      const lines = [useEmoji ? `💰 Baixou de preço! *${link.title}*` : `Baixou de preço! *${link.title}*`];
       if (link.sub) lines.push(link.sub);
-      lines.push("", `👉 ${link.href}`);
+      lines.push("", useEmoji ? `👉 ${link.href}` : link.href);
       return lines.join("\n");
     },
   },
@@ -266,7 +268,8 @@ const MESSAGE_TEMPLATES = [
 
 function ShareModal({ link, onClose }) {
   const [templateIndex, setTemplateIndex] = useState(0);
-  const message = MESSAGE_TEMPLATES[templateIndex].build(link);
+  const [useEmoji, setUseEmoji] = useState(true);
+  const message = MESSAGE_TEMPLATES[templateIndex].build(link, useEmoji);
 
   function openWhatsApp() {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
@@ -304,6 +307,11 @@ function ShareModal({ link, onClose }) {
             </button>
           ))}
         </div>
+
+        <label className="flex items-center gap-2 font-mono text-xs text-slate-300 mb-4">
+          <input type="checkbox" checked={useEmoji} onChange={(e) => setUseEmoji(e.target.checked)} />
+          incluir emojis (desmarque se o WhatsApp Web no PC bagunçar o texto)
+        </label>
 
         <FieldLabel>Prévia</FieldLabel>
         <pre className="whitespace-pre-wrap font-mono text-sm text-slate-200 bg-[#0a1220] border border-white/10 rounded-lg px-3 py-2.5 mb-4">
@@ -390,7 +398,7 @@ function LinkCard({ link, onChange, onDelete }) {
     <div className="rounded-[12px] border border-white/10 bg-[#101b2e] p-4 flex items-center gap-3">
       <span
         className={`flex items-center justify-center rounded-[10px] bg-emerald-400/15 text-emerald-300 flex-shrink-0 overflow-hidden ${
-          link.image_url ? "w-14 h-14" : "w-10 h-10"
+          link.image_url ? "w-20 h-20" : "w-10 h-10"
         }`}
       >
         {link.image_url ? (
