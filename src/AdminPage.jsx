@@ -6,7 +6,7 @@ import Logo from "./components/Logo.jsx";
 
 const ICON_NAMES = Object.keys(ICONS);
 const EMPTY_FORM = { section: "produto", icon: "Zap", title: "", sub: "", href: "", position: 0, active: true };
-const SECTION_LABELS = { produto: "Produtos", social: "Social" };
+const SECTION_LABELS = { produto: "Produtos", social: "Redes sociais" };
 
 const inputClass =
   "w-full bg-[#0a1220] border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-400/60";

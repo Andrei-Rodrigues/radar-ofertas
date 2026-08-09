@@ -71,7 +71,7 @@ export default function LinkBioPage() {
           <div className="pointer-events-none absolute inset-[10px] rounded-lg border border-dashed border-emerald-300/20" />
 
           <div className="font-mono text-[11px] tracking-[0.12em] uppercase text-emerald-300 mb-3.5">
-            achados de tecnologia
+            links de ouro
           </div>
 
           <img
@@ -82,9 +82,9 @@ export default function LinkBioPage() {
 
           <div className="font-mono font-bold text-xl tracking-tight">@radar.de.ofertas052</div>
           <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-            Produtos que eu testo de verdade,
+            Os links dos achados
             <br />
-            antes de indicar pra vocês.
+            que valem a pena testar.
           </p>
 
           <div className="flex justify-center gap-2.5 mt-4 flex-wrap">
@@ -114,7 +114,7 @@ export default function LinkBioPage() {
             {/* SOCIAL */}
             {social.length > 0 && (
               <div className="mb-8">
-                <SectionLabel>social</SectionLabel>
+                <SectionLabel>redes sociais</SectionLabel>
                 <div className="flex flex-col gap-2.5">
                   {social.map((s) => (
                     <LinkButton key={s.id} {...s} />
