@@ -238,6 +238,9 @@ function LinkCard({ link, onChange, onDelete }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-slate-100 truncate">{link.title}</span>
+          <span className="font-mono text-[10px] text-emerald-300/70 border border-emerald-400/20 rounded-full px-2 py-0.5 flex-shrink-0">
+            {link.clicks ?? 0} {link.clicks === 1 ? "clique" : "cliques"}
+          </span>
           {!link.active && (
             <span className="font-mono text-[10px] text-slate-500 border border-white/10 rounded-full px-2 py-0.5 flex-shrink-0">
               inativo
@@ -339,8 +342,7 @@ function Dashboard({ session }) {
     () => ({
       total: links.length,
       ativos: links.filter((l) => l.active).length,
-      produtos: links.filter((l) => l.section === "produto").length,
-      social: links.filter((l) => l.section === "social").length,
+      cliques: links.reduce((sum, l) => sum + (l.clicks ?? 0), 0),
     }),
     [links]
   );
@@ -371,8 +373,7 @@ function Dashboard({ session }) {
       <div className="flex gap-2.5 flex-wrap mb-6">
         <StatTile label="total" value={stats.total} />
         <StatTile label="ativos" value={stats.ativos} />
-        <StatTile label="produtos" value={stats.produtos} />
-        <StatTile label="social" value={stats.social} />
+        <StatTile label="cliques" value={stats.cliques} />
       </div>
 
       <button

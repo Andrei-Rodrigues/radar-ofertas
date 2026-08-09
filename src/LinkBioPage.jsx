@@ -16,11 +16,14 @@ function SectionLabel({ children }) {
   );
 }
 
-function LinkButton({ icon, title, sub, href, product }) {
+function LinkButton({ id, icon, title, sub, href, product }) {
   const Icon = ICONS[icon] ?? Zap;
   return (
     <a
       href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => supabase.rpc("increment_link_click", { link_id: id })}
       className="group relative flex items-center gap-3 px-[18px] py-4 rounded-[14px] border border-white/10 bg-[#101b2e] hover:bg-[#152238] hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
     >
       <span
