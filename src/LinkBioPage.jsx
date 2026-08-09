@@ -16,7 +16,7 @@ function SectionLabel({ children }) {
   );
 }
 
-function LinkButton({ id, icon, title, sub, href, product }) {
+function LinkButton({ id, icon, title, sub, href, product, image_url }) {
   const Icon = ICONS[icon] ?? Zap;
   return (
     <a
@@ -27,11 +27,15 @@ function LinkButton({ id, icon, title, sub, href, product }) {
       className="group relative flex items-center gap-3 px-[18px] py-4 rounded-[14px] border border-white/10 bg-[#101b2e] hover:bg-[#152238] hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
     >
       <span
-        className={`flex items-center justify-center w-[34px] h-[34px] rounded-[9px] flex-shrink-0 ${
+        className={`flex items-center justify-center w-[34px] h-[34px] rounded-[9px] flex-shrink-0 overflow-hidden ${
           product ? "bg-emerald-500 text-[#0a1220]" : "bg-emerald-400/15 text-emerald-300"
         }`}
       >
-        <Icon size={17} strokeWidth={2} />
+        {image_url ? (
+          <img src={image_url} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <Icon size={17} strokeWidth={2} />
+        )}
       </span>
       <span className="flex-1 text-left">
         <span className="block font-semibold text-[15px] text-slate-100">{title}</span>

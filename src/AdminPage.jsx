@@ -5,8 +5,26 @@ import { blueprintBg } from "./lib/theme";
 import Logo from "./components/Logo.jsx";
 
 const ICON_NAMES = Object.keys(ICONS);
-const EMPTY_FORM = { section: "produto", icon: "Zap", title: "", sub: "", href: "", position: 0, active: true };
+const EMPTY_FORM = {
+  section: "produto",
+  icon: "Zap",
+  title: "",
+  sub: "",
+  href: "",
+  position: 0,
+  active: true,
+  image_url: null,
+};
 const SECTION_LABELS = { produto: "Produtos", social: "Redes sociais" };
+
+async function uploadProductImage(file) {
+  const ext = file.name.split(".").pop();
+  const path = `${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("product-images").upload(path, file);
+  if (error) throw error;
+  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
 
 const inputClass =
   "w-full bg-[#0a1220] border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-400/60";
@@ -94,8 +112,59 @@ function FieldLabel({ children }) {
 }
 
 function LinkForm({ form, setForm }) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  async function handleImageChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      const url = await uploadProductImage(file);
+      setForm({ ...form, image_url: url });
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
   return (
     <div className="flex flex-col gap-3">
+      <div>
+        <FieldLabel>Foto do produto (opcional)</FieldLabel>
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-lg border border-white/10 bg-[#0a1220] flex items-center justify-center overflow-hidden flex-shrink-0">
+            {form.image_url ? (
+              <img src={form.image_url} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-mono text-[9px] text-slate-600">sem foto</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={uploading}
+              className="w-full text-xs text-slate-300 font-mono file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-[#0a1220] file:text-xs file:font-semibold file:cursor-pointer"
+            />
+            {uploading && <p className="font-mono text-[10px] text-slate-500 mt-1">enviando...</p>}
+            {uploadError && <p className="font-mono text-[10px] text-red-400 mt-1">{uploadError}</p>}
+            {form.image_url && (
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, image_url: null })}
+                className="font-mono text-[10px] text-slate-500 hover:text-red-300 mt-1"
+              >
+                remover foto
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <FieldLabel>Seção</FieldLabel>
@@ -276,6 +345,7 @@ function LinkCard({ link, onChange, onDelete }) {
         href: form.href,
         position: Number(form.position),
         active: form.active,
+        image_url: form.image_url,
       })
       .eq("id", link.id);
     setSaving(false);
@@ -318,8 +388,12 @@ function LinkCard({ link, onChange, onDelete }) {
 
   return (
     <div className="rounded-[12px] border border-white/10 bg-[#101b2e] p-4 flex items-center gap-3">
-      <span className="flex items-center justify-center w-10 h-10 rounded-[9px] bg-emerald-400/15 text-emerald-300 flex-shrink-0">
-        <Icon size={18} strokeWidth={2} />
+      <span className="flex items-center justify-center w-10 h-10 rounded-[9px] bg-emerald-400/15 text-emerald-300 flex-shrink-0 overflow-hidden">
+        {link.image_url ? (
+          <img src={link.image_url} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <Icon size={18} strokeWidth={2} />
+        )}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
