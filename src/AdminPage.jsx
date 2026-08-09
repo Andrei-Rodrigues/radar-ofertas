@@ -124,7 +124,17 @@ function LinkForm({ form, setForm }) {
         <input className={inputClass} value={form.sub ?? ""} onChange={(e) => setForm({ ...form, sub: e.target.value })} />
       </div>
       <div>
-        <FieldLabel>Link</FieldLabel>
+        <div className="flex items-center justify-between mb-1">
+          <FieldLabel>Link</FieldLabel>
+          <a
+            href="https://www.mercadolivre.com.br/l/afiliados-gerar-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[10px] text-emerald-300/80 hover:text-emerald-300 -mt-1"
+          >
+            gerar link de afiliado ↗
+          </a>
+        </div>
         <input
           className={inputClass}
           placeholder="https://..."
@@ -155,20 +165,96 @@ function LinkForm({ form, setForm }) {
   );
 }
 
-function buildPromoMessage(link) {
-  const lines = [`🔥 *${link.title}*`];
-  if (link.sub) lines.push(link.sub);
-  lines.push("", `👉 ${link.href}`);
-  return lines.join("\n");
-}
+const MESSAGE_TEMPLATES = [
+  {
+    label: "🔥 Oferta",
+    build: (link) => {
+      const lines = [`🔥 *${link.title}*`];
+      if (link.sub) lines.push(link.sub);
+      lines.push("", `👉 ${link.href}`);
+      return lines.join("\n");
+    },
+  },
+  {
+    label: "⚡ Achado do dia",
+    build: (link) => {
+      const lines = [`⚡ Achado do dia: *${link.title}*`];
+      if (link.sub) lines.push(link.sub);
+      lines.push("", `👉 confere: ${link.href}`);
+      return lines.join("\n");
+    },
+  },
+  {
+    label: "💰 Preço baixou",
+    build: (link) => {
+      const lines = [`💰 Baixou de preço! *${link.title}*`];
+      if (link.sub) lines.push(link.sub);
+      lines.push("", `👉 ${link.href}`);
+      return lines.join("\n");
+    },
+  },
+];
 
-function shareOnWhatsApp(link) {
-  const url = `https://wa.me/?text=${encodeURIComponent(buildPromoMessage(link))}`;
-  window.open(url, "_blank", "noopener,noreferrer");
+function ShareModal({ link, onClose }) {
+  const [templateIndex, setTemplateIndex] = useState(0);
+  const message = MESSAGE_TEMPLATES[templateIndex].build(link);
+
+  function openWhatsApp() {
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4 z-50 overflow-y-auto py-10"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-[14px] border border-emerald-400/40 bg-[#101b2e] p-6 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-bold text-slate-100">Compartilhar promoção</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-lg leading-none">
+            ✕
+          </button>
+        </div>
+
+        <FieldLabel>Modelo de mensagem</FieldLabel>
+        <div className="flex gap-2 flex-wrap mb-4">
+          {MESSAGE_TEMPLATES.map((t, i) => (
+            <button
+              key={t.label}
+              onClick={() => setTemplateIndex(i)}
+              className={`px-3 py-1.5 rounded-full text-xs font-mono border transition-colors ${
+                i === templateIndex
+                  ? "bg-emerald-500 text-[#0a1220] border-emerald-500 font-semibold"
+                  : "border-white/10 text-slate-300 hover:bg-white/5"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <FieldLabel>Prévia</FieldLabel>
+        <pre className="whitespace-pre-wrap font-mono text-sm text-slate-200 bg-[#0a1220] border border-white/10 rounded-lg px-3 py-2.5 mb-4">
+          {message}
+        </pre>
+
+        <button
+          onClick={openWhatsApp}
+          className="w-full px-4 py-2.5 rounded-lg bg-emerald-500 text-[#0a1220] font-semibold hover:bg-emerald-400 transition-colors"
+        >
+          Abrir no WhatsApp
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function LinkCard({ link, onChange, onDelete }) {
   const [editing, setEditing] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const [form, setForm] = useState(link);
   const [saving, setSaving] = useState(false);
   const Icon = ICONS[link.icon] ?? ICONS.Zap;
@@ -253,7 +339,7 @@ function LinkCard({ link, onChange, onDelete }) {
       <div className="flex flex-col gap-1.5 flex-shrink-0">
         {link.section === "produto" && (
           <button
-            onClick={() => shareOnWhatsApp(link)}
+            onClick={() => setSharing(true)}
             className="px-2.5 py-1 rounded-lg border border-emerald-400/40 text-emerald-300 text-xs hover:bg-emerald-400/10"
           >
             compartilhar
@@ -272,6 +358,7 @@ function LinkCard({ link, onChange, onDelete }) {
           excluir
         </button>
       </div>
+      {sharing && <ShareModal link={link} onClose={() => setSharing(false)} />}
     </div>
   );
 }
