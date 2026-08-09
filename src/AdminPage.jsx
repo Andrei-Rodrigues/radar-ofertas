@@ -388,7 +388,11 @@ function LinkCard({ link, onChange, onDelete }) {
 
   return (
     <div className="rounded-[12px] border border-white/10 bg-[#101b2e] p-4 flex items-center gap-3">
-      <span className="flex items-center justify-center w-10 h-10 rounded-[9px] bg-emerald-400/15 text-emerald-300 flex-shrink-0 overflow-hidden">
+      <span
+        className={`flex items-center justify-center rounded-[10px] bg-emerald-400/15 text-emerald-300 flex-shrink-0 overflow-hidden ${
+          link.image_url ? "w-14 h-14" : "w-10 h-10"
+        }`}
+      >
         {link.image_url ? (
           <img src={link.image_url} alt="" className="w-full h-full object-cover" />
         ) : (

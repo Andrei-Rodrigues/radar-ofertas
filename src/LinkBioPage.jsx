@@ -24,12 +24,14 @@ function LinkButton({ id, icon, title, sub, href, product, image_url }) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => supabase.rpc("increment_link_click", { link_id: id })}
-      className="group relative flex items-center gap-3 px-[18px] py-4 rounded-[14px] border border-white/10 bg-[#101b2e] hover:bg-[#152238] hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
+      className={`group relative flex items-center gap-3.5 rounded-[14px] border border-white/10 bg-[#101b2e] hover:bg-[#152238] hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2 ${
+        image_url ? "pl-[10px] pr-[18px] py-[10px]" : "px-[18px] py-4"
+      }`}
     >
       <span
-        className={`flex items-center justify-center w-[34px] h-[34px] rounded-[9px] flex-shrink-0 overflow-hidden ${
-          product ? "bg-emerald-500 text-[#0a1220]" : "bg-emerald-400/15 text-emerald-300"
-        }`}
+        className={`flex items-center justify-center rounded-[10px] flex-shrink-0 overflow-hidden ${
+          image_url ? "w-[54px] h-[54px]" : "w-[34px] h-[34px]"
+        } ${product ? "bg-emerald-500 text-[#0a1220]" : "bg-emerald-400/15 text-emerald-300"}`}
       >
         {image_url ? (
           <img src={image_url} alt="" className="w-full h-full object-cover" />
