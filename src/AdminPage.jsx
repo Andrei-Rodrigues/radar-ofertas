@@ -155,6 +155,18 @@ function LinkForm({ form, setForm }) {
   );
 }
 
+function buildPromoMessage(link) {
+  const lines = [`🔥 *${link.title}*`];
+  if (link.sub) lines.push(link.sub);
+  lines.push("", `👉 ${link.href}`);
+  return lines.join("\n");
+}
+
+function shareOnWhatsApp(link) {
+  const url = `https://wa.me/?text=${encodeURIComponent(buildPromoMessage(link))}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 function LinkCard({ link, onChange, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(link);
@@ -236,6 +248,14 @@ function LinkCard({ link, onChange, onDelete }) {
         <div className="font-mono text-xs text-emerald-300/70 truncate mt-0.5">{link.href}</div>
       </div>
       <div className="flex flex-col gap-1.5 flex-shrink-0">
+        {link.section === "produto" && (
+          <button
+            onClick={() => shareOnWhatsApp(link)}
+            className="px-2.5 py-1 rounded-lg border border-emerald-400/40 text-emerald-300 text-xs hover:bg-emerald-400/10"
+          >
+            compartilhar
+          </button>
+        )}
         <button
           onClick={startEdit}
           className="px-2.5 py-1 rounded-lg border border-white/10 text-slate-300 text-xs hover:bg-white/5"
