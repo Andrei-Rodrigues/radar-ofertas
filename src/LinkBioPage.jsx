@@ -60,7 +60,7 @@ function ProductCard({ id, title, sub, href, image_url }) {
       onClick={() => trackClick(id)}
       className="group block rounded-[14px] border border-white/10 bg-[#101b2e] overflow-hidden hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
     >
-      <div className="w-full aspect-square bg-[#0a1220]">
+      <div className="w-full aspect-[16/9] bg-[#0a1220]">
         <img src={image_url} alt="" className="w-full h-full object-cover" />
       </div>
       <div className="flex items-center gap-2 px-4 py-3.5">
