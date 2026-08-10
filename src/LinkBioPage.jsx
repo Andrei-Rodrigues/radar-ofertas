@@ -1,10 +1,35 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Usb, Zap, Music2, Instagram, MessageCircle, ArrowRight } from "lucide-react";
+import {
+  Usb,
+  Zap,
+  Music2,
+  Instagram,
+  MessageCircle,
+  ArrowRight,
+  Laptop,
+  Smartphone,
+  Home,
+  Sofa,
+  Dumbbell,
+  Trophy,
+} from "lucide-react";
 import { supabase } from "./lib/supabaseClient";
 import { blueprintBg } from "./lib/theme";
 import { CATEGORIES } from "./lib/categories";
 
-export const ICONS = { Usb, Zap, Music2, Instagram, MessageCircle };
+export const ICONS = {
+  Usb,
+  Zap,
+  Music2,
+  Instagram,
+  MessageCircle,
+  Laptop,
+  Smartphone,
+  Home,
+  Sofa,
+  Dumbbell,
+  Trophy,
+};
 
 function SectionLabel({ children }) {
   return (
