@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Usb, Zap, Music2, Instagram, MessageCircle, ArrowRight } from "lucide-react";
 import { supabase } from "./lib/supabaseClient";
 import { blueprintBg } from "./lib/theme";
+import { CATEGORIES } from "./lib/categories";
 
 export const ICONS = { Usb, Zap, Music2, Instagram, MessageCircle };
 
@@ -16,28 +17,28 @@ function SectionLabel({ children }) {
   );
 }
 
-function LinkButton({ id, icon, title, sub, href, product, image_url }) {
+function trackClick(id) {
+  supabase.rpc("increment_link_click", { link_id: id }).then(({ error }) => {
+    if (error) console.error(error);
+  });
+}
+
+function LinkButton({ id, icon, title, sub, href, product }) {
   const Icon = ICONS[icon] ?? Zap;
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => supabase.rpc("increment_link_click", { link_id: id })}
-      className={`group relative flex items-center gap-4 rounded-[14px] border border-white/10 bg-[#101b2e] hover:bg-[#152238] hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2 ${
-        image_url ? "pl-[10px] pr-[18px] py-[10px]" : "px-[18px] py-4"
-      }`}
+      onClick={() => trackClick(id)}
+      className="group relative flex items-center gap-3 px-[18px] py-4 rounded-[14px] border border-white/10 bg-[#101b2e] hover:bg-[#152238] hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
     >
       <span
-        className={`flex items-center justify-center rounded-[12px] flex-shrink-0 overflow-hidden ${
-          image_url ? "w-[84px] h-[84px]" : "w-[34px] h-[34px]"
-        } ${product ? "bg-emerald-500 text-[#0a1220]" : "bg-emerald-400/15 text-emerald-300"}`}
+        className={`flex items-center justify-center w-[34px] h-[34px] rounded-[9px] flex-shrink-0 ${
+          product ? "bg-emerald-500 text-[#0a1220]" : "bg-emerald-400/15 text-emerald-300"
+        }`}
       >
-        {image_url ? (
-          <img src={image_url} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <Icon size={17} strokeWidth={2} />
-        )}
+        <Icon size={17} strokeWidth={2} />
       </span>
       <span className="flex-1 text-left">
         <span className="block font-semibold text-[15px] text-slate-100">{title}</span>
@@ -46,6 +47,29 @@ function LinkButton({ id, icon, title, sub, href, product, image_url }) {
         )}
       </span>
       <ArrowRight size={16} className="text-slate-600 group-hover:text-emerald-300 transition-colors" />
+    </a>
+  );
+}
+
+function ProductCard({ id, title, sub, href, image_url }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => trackClick(id)}
+      className="group block rounded-[14px] border border-white/10 bg-[#101b2e] overflow-hidden hover:border-emerald-400/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400 focus-visible:outline-offset-2"
+    >
+      <div className="w-full aspect-square bg-[#0a1220]">
+        <img src={image_url} alt="" className="w-full h-full object-cover" />
+      </div>
+      <div className="flex items-center gap-2 px-4 py-3.5">
+        <div className="flex-1 min-w-0">
+          <span className="block font-semibold text-[15px] text-slate-100">{title}</span>
+          {sub && <span className="block font-mono text-[11px] text-slate-500 mt-0.5">{sub}</span>}
+        </div>
+        <ArrowRight size={16} className="text-slate-600 group-hover:text-emerald-300 transition-colors flex-shrink-0" />
+      </div>
     </a>
   );
 }
@@ -71,6 +95,16 @@ export default function LinkBioPage() {
         setLoading(false);
       });
   }, []);
+
+  const productsByCategory = useMemo(() => {
+    const groups = {};
+    for (const p of products) {
+      const cat = p.category || "Outros";
+      (groups[cat] ??= []).push(p);
+    }
+    const order = [...CATEGORIES, "Outros"];
+    return Object.entries(groups).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+  }, [products]);
 
   return (
     <div className="min-h-screen w-full flex justify-center px-5 py-12 text-slate-100" style={blueprintBg}>
@@ -112,9 +146,24 @@ export default function LinkBioPage() {
             {products.length > 0 && (
               <div className="mb-8">
                 <SectionLabel>produtos</SectionLabel>
-                <div className="flex flex-col gap-2.5">
-                  {products.map((p) => (
-                    <LinkButton key={p.id} {...p} product />
+                <div className="flex flex-col gap-5">
+                  {productsByCategory.map(([category, items]) => (
+                    <div key={category}>
+                      {productsByCategory.length > 1 && (
+                        <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-emerald-300/60 mb-2 px-1">
+                          {category}
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-2.5">
+                        {items.map((p) =>
+                          p.image_url ? (
+                            <ProductCard key={p.id} {...p} />
+                          ) : (
+                            <LinkButton key={p.id} {...p} product />
+                          )
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

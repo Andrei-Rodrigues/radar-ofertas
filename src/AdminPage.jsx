@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ICONS } from "./LinkBioPage.jsx";
 import { supabase } from "./lib/supabaseClient";
 import { blueprintBg } from "./lib/theme";
+import { CATEGORIES } from "./lib/categories";
 import Logo from "./components/Logo.jsx";
 
 const ICON_NAMES = Object.keys(ICONS);
@@ -14,6 +15,7 @@ const EMPTY_FORM = {
   position: 0,
   active: true,
   image_url: null,
+  category: CATEGORIES[0],
 };
 const SECTION_LABELS = { produto: "Produtos", social: "Redes sociais" };
 
@@ -168,7 +170,17 @@ function LinkForm({ form, setForm }) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <FieldLabel>Seção</FieldLabel>
-          <select className={selectClass} value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })}>
+          <select
+            className={selectClass}
+            value={form.section}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                section: e.target.value,
+                category: e.target.value === "produto" ? form.category ?? CATEGORIES[0] : null,
+              })
+            }
+          >
             <option value="produto">produto</option>
             <option value="social">social</option>
           </select>
@@ -184,6 +196,22 @@ function LinkForm({ form, setForm }) {
           </select>
         </div>
       </div>
+      {form.section === "produto" && (
+        <div>
+          <FieldLabel>Categoria</FieldLabel>
+          <select
+            className={selectClass}
+            value={form.category ?? CATEGORIES[0]}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+          >
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div>
         <FieldLabel>Título</FieldLabel>
         <input className={inputClass} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
@@ -354,6 +382,7 @@ function LinkCard({ link, onChange, onDelete }) {
         position: Number(form.position),
         active: form.active,
         image_url: form.image_url,
+        category: form.section === "produto" ? form.category ?? CATEGORIES[0] : null,
       })
       .eq("id", link.id);
     setSaving(false);
@@ -410,6 +439,11 @@ function LinkCard({ link, onChange, onDelete }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-slate-100 truncate">{link.title}</span>
+          {link.category && (
+            <span className="font-mono text-[10px] text-slate-400 border border-white/10 rounded-full px-2 py-0.5 flex-shrink-0">
+              {link.category}
+            </span>
+          )}
           <span className="font-mono text-[10px] text-emerald-300/70 border border-emerald-400/20 rounded-full px-2 py-0.5 flex-shrink-0">
             {link.clicks ?? 0} {link.clicks === 1 ? "clique" : "cliques"}
           </span>
