@@ -154,6 +154,18 @@ export default function LinkBioPage() {
 
         {!loading && (
           <>
+            {/* SOCIAL */}
+            {social.length > 0 && (
+              <div className="mb-6">
+                <SectionLabel>redes sociais</SectionLabel>
+                <div className="flex flex-col gap-2">
+                  {social.map((s) => (
+                    <LinkButton key={s.id} {...s} />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* PRODUTOS */}
             {products.length > 0 && (
               <div className="mb-6">
@@ -174,18 +186,6 @@ export default function LinkBioPage() {
                         ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SOCIAL */}
-            {social.length > 0 && (
-              <div className="mb-6">
-                <SectionLabel>redes sociais</SectionLabel>
-                <div className="flex flex-col gap-2">
-                  {social.map((s) => (
-                    <LinkButton key={s.id} {...s} />
                   ))}
                 </div>
               </div>
