@@ -365,6 +365,7 @@ function ShareModal({ link, onClose }) {
   const [loading, setLoading] = useState(true);
   const [templateId, setTemplateId] = useState(null);
   const [useEmoji, setUseEmoji] = useState(true);
+  const [editedMessage, setEditedMessage] = useState("");
 
   useEffect(() => {
     supabase
@@ -381,14 +382,15 @@ function ShareModal({ link, onClose }) {
       });
   }, []);
 
-  const selected = templates.find((t) => t.id === templateId);
-  const message = selected ? (() => {
-    const filled = fillTemplate(selected.body, link);
-    return useEmoji ? filled : stripEmoji(filled);
-  })() : "";
+  useEffect(() => {
+    const t = templates.find((tpl) => tpl.id === templateId);
+    if (!t) return;
+    const filled = fillTemplate(t.body, link);
+    setEditedMessage(useEmoji ? filled : stripEmoji(filled));
+  }, [templateId, useEmoji, templates, link]);
 
   function openWhatsApp() {
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    window.open(`https://wa.me/?text=${encodeURIComponent(editedMessage)}`, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -437,10 +439,12 @@ function ShareModal({ link, onClose }) {
               incluir emojis (desmarque se o WhatsApp Web no PC bagunçar o texto)
             </label>
 
-            <FieldLabel>Prévia</FieldLabel>
-            <pre className="whitespace-pre-wrap font-mono text-sm text-slate-200 bg-[#0a1220] border border-white/10 rounded-lg px-3 py-2.5 mb-4">
-              {message}
-            </pre>
+            <FieldLabel>Mensagem (edite à vontade — só vale pra esse envio)</FieldLabel>
+            <textarea
+              className="w-full min-h-[150px] resize-y whitespace-pre-wrap font-mono text-sm text-slate-200 bg-[#0a1220] border border-white/10 rounded-lg px-3 py-2.5 mb-4 outline-none focus:border-emerald-400/60"
+              value={editedMessage}
+              onChange={(e) => setEditedMessage(e.target.value)}
+            />
 
             <button
               onClick={openWhatsApp}
