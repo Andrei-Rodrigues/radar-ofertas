@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { supabase } from "./lib/supabaseClient";
 import { blueprintBg } from "./lib/theme";
-import { CATEGORIES } from "./lib/categories";
 
 export const ICONS = {
   Usb,
@@ -128,8 +127,11 @@ export default function LinkBioPage() {
       const cat = p.category || "Outros";
       (groups[cat] ??= []).push(p);
     }
-    const order = [...CATEGORIES, "Outros"];
-    return Object.entries(groups).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]));
+    return Object.entries(groups).sort((a, b) => {
+      if (a[0] === "Outros") return 1;
+      if (b[0] === "Outros") return -1;
+      return a[0].localeCompare(b[0], "pt-BR");
+    });
   }, [products]);
 
   return (

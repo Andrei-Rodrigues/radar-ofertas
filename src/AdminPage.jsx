@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ICONS } from "./LinkBioPage.jsx";
 import { supabase } from "./lib/supabaseClient";
 import { blueprintBg } from "./lib/theme";
-import { CATEGORIES } from "./lib/categories";
 import Logo from "./components/Logo.jsx";
 
 const ICON_NAMES = Object.keys(ICONS);
@@ -15,7 +14,7 @@ const EMPTY_FORM = {
   position: 0,
   active: true,
   image_url: null,
-  category: CATEGORIES[0],
+  category: "",
   original_price: "",
   sale_price: "",
   coupon_code: "",
@@ -132,6 +131,98 @@ function FieldLabel({ children }) {
   return <label className="block font-mono text-[10px] uppercase tracking-[0.1em] text-slate-500 mb-1">{children}</label>;
 }
 
+function CategoryField({ value, onChange }) {
+  const [categories, setCategories] = useState([]);
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("categories")
+      .select("*")
+      .order("name", { ascending: true })
+      .then(({ data, error }) => {
+        if (error) {
+          alert(error.message);
+          return;
+        }
+        setCategories(data);
+        if (!value && data.length > 0) onChange(data[0].name);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function addCategory() {
+    const name = newName.trim();
+    if (!name) return;
+    setSaving(true);
+    const { data, error } = await supabase.from("categories").insert({ name }).select().single();
+    setSaving(false);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setCategories((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+    onChange(data.name);
+    setAdding(false);
+    setNewName("");
+  }
+
+  if (adding) {
+    return (
+      <div>
+        <FieldLabel>Nova categoria</FieldLabel>
+        <div className="flex gap-2">
+          <input
+            className={inputClass}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Ex: Beleza"
+            autoFocus
+          />
+          <button
+            type="button"
+            onClick={addCategory}
+            disabled={saving || !newName.trim()}
+            className="px-3 py-2 rounded-lg bg-emerald-500 text-[#0a1220] text-xs font-semibold hover:bg-emerald-400 disabled:opacity-60 flex-shrink-0"
+          >
+            {saving ? "..." : "criar"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setAdding(false)}
+            className="px-3 py-2 rounded-lg border border-white/10 text-slate-300 text-xs hover:bg-white/5 flex-shrink-0"
+          >
+            cancelar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <FieldLabel>Categoria</FieldLabel>
+      <select
+        className={selectClass}
+        value={value ?? ""}
+        onChange={(e) => {
+          if (e.target.value === "__new__") setAdding(true);
+          else onChange(e.target.value);
+        }}
+      >
+        {categories.map((c) => (
+          <option key={c.id} value={c.name}>
+            {c.name}
+          </option>
+        ))}
+        <option value="__new__">+ nova categoria...</option>
+      </select>
+    </div>
+  );
+}
+
 function LinkForm({ form, setForm }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -196,7 +287,7 @@ function LinkForm({ form, setForm }) {
               setForm({
                 ...form,
                 section: e.target.value,
-                category: e.target.value === "produto" ? form.category ?? CATEGORIES[0] : null,
+                category: e.target.value === "produto" ? form.category : null,
               })
             }
           >
@@ -216,20 +307,7 @@ function LinkForm({ form, setForm }) {
         </div>
       </div>
       {form.section === "produto" && (
-        <div>
-          <FieldLabel>Categoria</FieldLabel>
-          <select
-            className={selectClass}
-            value={form.category ?? CATEGORIES[0]}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategoryField value={form.category} onChange={(cat) => setForm({ ...form, category: cat })} />
       )}
       <div>
         <FieldLabel>Título</FieldLabel>
@@ -665,7 +743,7 @@ function LinkCard({ link, onChange, onDelete }) {
         position: Number(form.position),
         active: form.active,
         image_url: form.image_url,
-        category: form.section === "produto" ? form.category ?? CATEGORIES[0] : null,
+        category: form.section === "produto" ? form.category : null,
         original_price: toNullableNumber(form.original_price),
         sale_price: toNullableNumber(form.sale_price),
         coupon_code: toNullableText(form.coupon_code),
