@@ -718,9 +718,101 @@ function TemplatesModal({ onClose }) {
   );
 }
 
+function ClickHistoryModal({ link, onClose }) {
+  const [clicks, setClicks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("link_clicks")
+      .select("*")
+      .eq("link_id", link.id)
+      .order("clicked_at", { ascending: false })
+      .limit(50)
+      .then(({ data, error }) => {
+        if (error) alert(error.message);
+        else setClicks(data);
+        setLoading(false);
+      });
+  }, [link.id]);
+
+  const bySource = useMemo(() => {
+    const counts = {};
+    for (const c of clicks) {
+      const s = c.source || "direto";
+      counts[s] = (counts[s] ?? 0) + 1;
+    }
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [clicks]);
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4 z-50 overflow-y-auto py-10"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-[14px] border border-emerald-400/40 bg-[#101b2e] p-6 my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-1">
+          <h2 className="font-bold text-slate-100">Histórico de cliques</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-lg leading-none">
+            ✕
+          </button>
+        </div>
+        <p className="font-mono text-xs text-slate-500 mb-4 truncate">{link.title}</p>
+
+        {loading ? (
+          <p className="text-slate-400 text-sm font-mono">carregando...</p>
+        ) : clicks.length === 0 ? (
+          <p className="text-slate-400 text-sm font-mono">
+            Nenhum clique registrado ainda (só conta a partir de agora — cliques antigos não foram
+            salvos com data/origem).
+          </p>
+        ) : (
+          <>
+            <FieldLabel>Por origem</FieldLabel>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {bySource.map(([source, count]) => (
+                <span
+                  key={source}
+                  className="font-mono text-xs text-emerald-300 border border-emerald-400/30 rounded-full px-2.5 py-1"
+                >
+                  {source}: {count}
+                </span>
+              ))}
+            </div>
+
+            <FieldLabel>Últimos cliques</FieldLabel>
+            <div className="flex flex-col gap-1 max-h-64 overflow-y-auto">
+              {clicks.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex justify-between font-mono text-xs text-slate-400 border-b border-white/5 py-1.5"
+                >
+                  <span>
+                    {new Date(c.clicked_at).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  <span className="text-emerald-300/70">{c.source || "direto"}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function LinkCard({ link, onChange, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [form, setForm] = useState(link);
   const [saving, setSaving] = useState(false);
   const Icon = ICONS[link.icon] ?? ICONS.Zap;
@@ -840,6 +932,12 @@ function LinkCard({ link, onChange, onDelete }) {
           </button>
         )}
         <button
+          onClick={() => setShowHistory(true)}
+          className="px-2.5 py-1 rounded-lg border border-white/10 text-slate-300 text-xs hover:bg-white/5"
+        >
+          histórico
+        </button>
+        <button
           onClick={startEdit}
           className="px-2.5 py-1 rounded-lg border border-white/10 text-slate-300 text-xs hover:bg-white/5"
         >
@@ -853,6 +951,7 @@ function LinkCard({ link, onChange, onDelete }) {
         </button>
       </div>
       {sharing && <ShareModal link={link} onClose={() => setSharing(false)} />}
+      {showHistory && <ClickHistoryModal link={link} onClose={() => setShowHistory(false)} />}
     </div>
   );
 }

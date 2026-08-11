@@ -41,8 +41,23 @@ function SectionLabel({ children }) {
   );
 }
 
+function detectSource() {
+  const ref = document.referrer;
+  if (!ref) return "direto";
+  try {
+    const host = new URL(ref).hostname.replace("www.", "");
+    if (host.includes("tiktok")) return "tiktok";
+    if (host.includes("whatsapp")) return "whatsapp";
+    if (host.includes("instagram")) return "instagram";
+    if (host.includes("facebook")) return "facebook";
+    return host;
+  } catch {
+    return "direto";
+  }
+}
+
 function trackClick(id) {
-  supabase.rpc("increment_link_click", { link_id: id }).then(({ error }) => {
+  supabase.rpc("increment_link_click", { link_id: id, source: detectSource() }).then(({ error }) => {
     if (error) console.error(error);
   });
 }
