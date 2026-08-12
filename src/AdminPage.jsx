@@ -894,8 +894,8 @@ function LinkCard({ link, onChange, onDelete }) {
         )}
       </span>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold text-slate-100 truncate">{link.title}</span>
+        <div className="font-semibold text-slate-100 truncate">{link.title}</div>
+        <div className="flex items-center gap-1.5 flex-wrap mt-1">
           {link.category && (
             <span className="font-mono text-[10px] text-slate-400 border border-white/10 rounded-full px-2 py-0.5 flex-shrink-0">
               {link.category}
