@@ -1026,14 +1026,14 @@ function Dashboard({ session }) {
     reload();
   }, []);
 
-  const stats = useMemo(
-    () => ({
-      total: links.length,
-      ativos: links.filter((l) => l.active).length,
-      cliques: links.reduce((sum, l) => sum + (l.clicks ?? 0), 0),
-    }),
-    [links]
-  );
+  const stats = useMemo(() => {
+    const produtos = links.filter((l) => l.section === "produto");
+    return {
+      total: produtos.length,
+      ativos: produtos.filter((l) => l.active).length,
+      cliques: produtos.reduce((sum, l) => sum + (l.clicks ?? 0), 0),
+    };
+  }, [links]);
 
   const sections = useMemo(() => {
     const groups = {};

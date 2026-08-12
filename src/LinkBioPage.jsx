@@ -118,6 +118,7 @@ export default function LinkBioPage() {
   const [products, setProducts] = useState([]);
   const [social, setSocial] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState(null);
 
   useEffect(() => {
     supabase
@@ -148,6 +149,11 @@ export default function LinkBioPage() {
       return a[0].localeCompare(b[0], "pt-BR");
     });
   }, [products]);
+
+  const visibleProductGroups = useMemo(
+    () => (activeCategory ? productsByCategory.filter(([cat]) => cat === activeCategory) : productsByCategory),
+    [productsByCategory, activeCategory]
+  );
 
   return (
     <div className="min-h-screen w-full flex justify-center px-5 py-6 text-slate-100" style={blueprintBg}>
@@ -187,10 +193,39 @@ export default function LinkBioPage() {
             {products.length > 0 && (
               <div className="mb-6">
                 <SectionLabel>produtos</SectionLabel>
+
+                {productsByCategory.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto mb-4 -mx-5 px-5 pb-0.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    <button
+                      onClick={() => setActiveCategory(null)}
+                      className={`flex-shrink-0 px-3.5 py-1.5 rounded-full font-mono text-[11px] border transition-colors ${
+                        !activeCategory
+                          ? "bg-emerald-500 text-[#0a1220] border-emerald-500 font-semibold"
+                          : "border-white/10 text-slate-400"
+                      }`}
+                    >
+                      Todos
+                    </button>
+                    {productsByCategory.map(([category]) => (
+                      <button
+                        key={category}
+                        onClick={() => setActiveCategory(category)}
+                        className={`flex-shrink-0 px-3.5 py-1.5 rounded-full font-mono text-[11px] border transition-colors ${
+                          activeCategory === category
+                            ? "bg-emerald-500 text-[#0a1220] border-emerald-500 font-semibold"
+                            : "border-white/10 text-slate-400"
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className="flex flex-col gap-4">
-                  {productsByCategory.map(([category, items]) => (
+                  {visibleProductGroups.map(([category, items]) => (
                     <div key={category}>
-                      {productsByCategory.length > 1 && (
+                      {!activeCategory && productsByCategory.length > 1 && (
                         <div className="font-mono text-[10px] uppercase tracking-[0.1em] text-emerald-300/60 mb-2 px-1">
                           {category}
                         </div>
